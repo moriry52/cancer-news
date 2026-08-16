@@ -119,6 +119,7 @@ async function fetchStats() {
         const { data: latest, error: errLatest } = await supabaseClient
             .from('articles')
             .select('published_at')
+            .eq('cancer_type', currentCancerType)
             .order('published_at', { ascending: false })
             .limit(1);
 
