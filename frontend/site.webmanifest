@@ -1,6 +1,6 @@
 {
-  "name": "Breast Cancer Paper News",
-  "short_name": "BCPN",
+  "name": "Cancer Paper News",
+  "short_name": "CPN",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
