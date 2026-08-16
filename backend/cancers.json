@@ -1,0 +1,38 @@
+[
+  {
+    "id": "breast",
+    "name": "乳癌",
+    "mesh_term": "(\"breast neoplasms\"[MeSH Terms] OR \"breast cancer\"[Title/Abstract])",
+    "specialty_name": "乳腺外科",
+    "doctor_type": "乳腺外科医",
+    "cancer_name": "乳癌",
+    "trend_keywords": "ADC, CDK4/6阻害薬, 免疫療法, PARP, ctDNA, De-escalation, ゲノム医療, 医療AI"
+  },
+  {
+    "id": "colorectal",
+    "name": "大腸癌",
+    "mesh_term": "(\"colorectal neoplasms\"[MeSH Terms] OR \"colorectal cancer\"[Title/Abstract] OR \"colon cancer\"[Title/Abstract] OR \"rectal cancer\"[Title/Abstract])",
+    "specialty_name": "消化器外科（大腸外科）",
+    "doctor_type": "大腸外科・消化器内科医",
+    "cancer_name": "大腸癌",
+    "trend_keywords": "ctDNA, ADC, 免疫療法, ロボット手術, 局所進行直腸癌(TNT), ゲノム医療, 医療AI"
+  },
+  {
+    "id": "stomach",
+    "name": "胃癌",
+    "mesh_term": "(\"stomach neoplasms\"[MeSH Terms] OR \"stomach cancer\"[Title/Abstract] OR \"gastric cancer\"[Title/Abstract])",
+    "specialty_name": "消化器外科（胃外科）",
+    "doctor_type": "胃外科・消化器内科医",
+    "cancer_name": "胃癌",
+    "trend_keywords": "免疫療法, HER2標的治療, Claudin18.2, ロボット手術, 腹腔内化学療法, ゲノム医療, 医療AI"
+  },
+  {
+    "id": "hbp",
+    "name": "肝胆膵癌",
+    "mesh_term": "(\"liver neoplasms\"[MeSH Terms] OR \"biliary tract neoplasms\"[MeSH Terms] OR \"pancreatic neoplasms\"[MeSH Terms] OR \"liver cancer\"[Title/Abstract] OR \"biliary cancer\"[Title/Abstract] OR \"pancreatic cancer\"[Title/Abstract])",
+    "specialty_name": "肝胆膵外科",
+    "doctor_type": "肝胆膵外科・消化器内科医",
+    "cancer_name": "肝胆膵癌",
+    "trend_keywords": "免疫療法, 局所療法, ゲノム医療, ナノリポソーマル, conversion surgery, 医療AI"
+  }
+]

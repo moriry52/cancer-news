@@ -1,0 +1,5 @@
+backend/.env
+.env
+venv/
+API_keys.txt
+2026081600/

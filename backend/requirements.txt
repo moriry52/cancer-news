@@ -1,0 +1,6 @@
+biopython>=1.81
+google-genai>=0.1.1
+python-dotenv>=1.0.0
+requests>=2.31.0
+pydantic>=2.5.3
+supabase>=2.3.0

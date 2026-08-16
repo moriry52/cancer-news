@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breast Cancer Paper News & Slide Generator | 乳癌論文デイリーニュース</title>
+    <meta name="description" content="乳腺外科医のための最新・高品質乳癌論文ニュースおよび簡易スライド自動生成ポータル">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="shortcut icon" href="favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+    <link rel="manifest" href="site.webmanifest" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap"
+        rel="stylesheet">
+
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+
+
+</head>
+
+<body>
+
+    <!-- Header Navigation -->
+    <header class="site-header">
+        <div class="header-container">
+            <div class="brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-dna"></i>
+                </div>
+                <div class="brand-text">
+                    <h1 id="app-title">Cancer <span>Paper News</span></h1>
+                </div>
+            </div>
+
+            <nav class="cancer-type-nav" id="cancer-type-nav">
+                <a href="/breast" class="cancer-nav-link" data-id="breast">乳癌</a>
+                <a href="/colorectal" class="cancer-nav-link" data-id="colorectal">大腸癌</a>
+                <a href="/stomach" class="cancer-nav-link" data-id="stomach">胃癌</a>
+                <a href="/hbp" class="cancer-nav-link" data-id="hbp">肝胆膵癌</a>
+            </nav>
+
+            <div class="header-actions">
+                <div class="badge-status" id="system-status">
+                    <span class="pulse-dot"></span> AI分析連動中
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Banner / Stats -->
+    <section class="hero-section">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h2>乳腺科医向け論文ニュース</h2>
+                <p>PubMed論文をAIが評価・要約・スライド生成。</p>
+            </div>
+            <div class="hero-stats">
+                <div class="stat-card">
+                    <div class="stat-num" id="total-articles-count">0</div>
+                    <div class="stat-label">本日厳選論文</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-num" id="high-score-count">0</div>
+                    <div class="stat-label">スコア85点以上</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Container -->
+    <main class="main-container">
+
+        <!-- Controls & Filter Bar -->
+        <div class="controls-bar">
+            <!-- Category Tabs -->
+            <div class="category-tabs" id="category-tabs">
+                <button class="tab-btn active" data-category="all">すべて</button>
+                <button class="tab-btn tab-btn-favorite" data-category="favorite"><i class="fa-solid fa-star"
+                        style="color:#f59e0b;"></i> お気に入り (<span id="favorite-count">0</span>)</button>
+                <button class="tab-btn" data-category="薬物療法"><i class="fa-solid fa-pills"></i> 薬物療法</button>
+                <button class="tab-btn" data-category="手術・局所療法"><i class="fa-solid fa-user-doctor"></i> 手術・局所療法</button>
+                <button class="tab-btn" data-category="診断・ゲノム・画像"><i class="fa-solid fa-microscope"></i> 診断・ゲノム</button>
+                <button class="tab-btn" data-category="その他"><i class="fa-solid fa-notes-medical"></i> その他</button>
+            </div>
+
+            <!-- Search & Sort -->
+            <div class="search-sort-group">
+                <div class="search-input-wrapper">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="search-input" placeholder="タイトル、ジャーナル名、キーワード検索...">
+                </div>
+                <div class="sort-wrapper">
+                    <select id="sort-select">
+                        <option value="published_desc">最新順</option>
+                        <option value="score_desc">スコア順 (高→低)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="pagination-container pagination-top-container" id="pagination-top-container">
+            <!-- Dynamic Pagination Buttons -->
+        </div>
+
+        <!-- News Grid Container -->
+        <div class="news-grid" id="news-grid">
+            <!-- Dynamic Rendered Article Cards -->
+            <div class="loading-spinner-wrapper" id="loading-state">
+                <div class="spinner"></div>
+                <p>Firestoreより最新の高評価論文を取得中...</p>
+            </div>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="pagination-container" id="pagination-container">
+            <!-- Dynamic Pagination Buttons -->
+        </div>
+
+    </main>
+
+    <!-- Journal Club Slide Modal -->
+    <div class="modal-overlay" id="slide-modal" aria-hidden="true">
+        <div class="modal-container">
+
+            <!-- Minimal Top Bar: 閉じるボタンとスライドカウンターのみ -->
+            <div class="modal-topbar">
+                <div class="slide-dots" id="slide-dots">
+                    <!-- Dynamic Dots -->
+                </div>
+                <button class="modal-close-btn" id="modal-close" title="閉じる">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Slide Viewer Container -->
+                <div class="slide-viewer">
+                    <!-- Slide Canvas Box -->
+                    <div class="slide-box" id="slide-box">
+                        <div class="slide-box-inner" id="slide-box-inner">
+                            <!-- Dynamic content rendered by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Navigation Controls -->
+                    <div class="slide-navigation">
+                        <button class="nav-btn" id="btn-prev-slide">
+                            <i class="fa-solid fa-chevron-left"></i> 前へ
+                        </button>
+                        <span class="slide-counter" id="slide-counter">1 / 6</span>
+                        <button class="nav-btn btn-primary-nav" id="btn-next-slide">
+                            次へ <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <p>&copy; 2026 Breast Cancer Paper News. Powered by Gemini API & PubMed Entrez.</p>
+        </div>
+    </footer>
+
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- App Logic -->
+    <script src="script.js?v=3"></script>
+</body>
+
+</html>

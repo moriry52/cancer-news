@@ -1,0 +1,16 @@
+[build]
+  base = "frontend"
+  publish = "."
+
+# No build command is necessary since it's just static HTML, CSS, and JS
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"

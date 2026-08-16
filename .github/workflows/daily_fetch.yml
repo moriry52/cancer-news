@@ -1,0 +1,34 @@
+name: Daily PubMed Fetch & Gemini Evaluation
+
+on:
+  schedule:
+    - cron: '0 18 * * *' # Run at 21:00 UTC (06:00 JST) every day
+  workflow_dispatch: # Allow manual triggering from GitHub UI
+
+jobs:
+  run-batch:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Run main.py
+        env:
+          NCBI_EMAIL: ${{ secrets.NCBI_EMAIL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          python backend/main.py
