@@ -37,6 +37,35 @@ function updateHeroTitle() {
     if (heroTitle) heroTitle.textContent = `${name} 最新論文ニュース`;
 }
 
+function switchCancerType(targetType) {
+    if (targetType === currentCancerType) return;
+
+    currentCancerType = targetType;
+    window.history.pushState(null, '', `/${targetType}`);
+
+    // PC nav links
+    document.querySelectorAll('.cancer-nav-link').forEach(l => l.classList.remove('active'));
+    const activeLink = document.querySelector(`.cancer-nav-link[data-id="${targetType}"]`);
+    if (activeLink) activeLink.classList.add('active');
+
+    // Mobile select
+    const mobileSelect = document.getElementById('cancer-type-select');
+    if (mobileSelect) mobileSelect.value = targetType;
+
+    updateHeroTitle();
+    loadFavoritesFromStorage();
+
+    // Reset to 'all' tab
+    const allTab = document.querySelector('.category-tabs .tab-btn[data-category="all"]');
+    if (allTab) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        allTab.classList.add('active');
+    }
+
+    fetchStats();
+    applyFiltersAndRender();
+}
+
 // Initialize Application
 document.addEventListener("DOMContentLoaded", async () => {
     // Client-side Routing logic
@@ -54,6 +83,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.querySelectorAll('.cancer-nav-link').forEach(link => {
         if (link.dataset.id === currentCancerType) link.classList.add('active');
     });
+
+    // Sync mobile select to current cancer type
+    const mobileSelect = document.getElementById('cancer-type-select');
+    if (mobileSelect) mobileSelect.value = currentCancerType;
 
     showGridLoading();
     loadFavoritesFromStorage();
@@ -199,12 +232,15 @@ function updateFavoriteCount() {
 }
 
 function updateSystemStatus(text, isError = false) {
+    const html = isError
+        ? `<span class="pulse-dot" style="background:#ef4444;"></span> ${text}`
+        : `<span class="pulse-dot"></span> ${text}`;
+    // PCバッジ
     const statusEl = document.getElementById("system-status");
-    if (statusEl) {
-        statusEl.innerHTML = isError
-            ? `<span class="pulse-dot" style="background:#ef4444;"></span> ${text}`
-            : `<span class="pulse-dot"></span> ${text}`;
-    }
+    if (statusEl) statusEl.innerHTML = html;
+    // スマホバッジ
+    const statusMobile = document.getElementById("system-status-mobile");
+    if (statusMobile) statusMobile.innerHTML = html;
 }
 
 function showLoading(isLoading) {
@@ -756,35 +792,21 @@ function setupEventListeners() {
         });
     }
 
-    // Cancer Type Navigation
+    // Cancer Type Navigation (PC links)
     document.querySelectorAll('.cancer-nav-link').forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
-            const targetType = link.dataset.id;
-            if (targetType === currentCancerType) return;
-            
-            currentCancerType = targetType;
-            window.history.pushState(null, '', `/${targetType}`);
-            
-            document.querySelectorAll('.cancer-nav-link').forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
-            
-            // Update hero title for new cancer type
-            updateHeroTitle();
-            
-            // Reset favorites for new cancer type
-            loadFavoritesFromStorage();
-            
-            // Reset to 'all' tab and fetch
-            const allTab = document.querySelector('.category-tabs .tab-btn[data-category="all"]');
-            if (allTab) {
-                document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-                allTab.classList.add('active');
-            }
-            fetchStats();
-            applyFiltersAndRender();
+            switchCancerType(link.dataset.id);
         });
     });
+
+    // Cancer Type Select (Mobile)
+    const mobileSelect = document.getElementById('cancer-type-select');
+    if (mobileSelect) {
+        mobileSelect.addEventListener('change', () => {
+            switchCancerType(mobileSelect.value);
+        });
+    }
 
     // Search Input: 300ms デバウンスでハイブリッド検索を実行
     let searchDebounceTimer = null;

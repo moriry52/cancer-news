@@ -32,7 +32,6 @@
 
 <body>
 
-    <!-- Header Navigation -->
     <header class="site-header">
         <div class="header-container">
             <div class="brand">
@@ -55,6 +54,19 @@
                 <div class="badge-status" id="system-status">
                     <span class="pulse-dot"></span> AI分析連動中
                 </div>
+            </div>
+        </div>
+
+        <!-- スマホ用セカンドロウ: 癌腫セレクト + ステータス -->
+        <div class="header-second-row">
+            <select class="cancer-type-select" id="cancer-type-select">
+                <option value="breast">乳癌</option>
+                <option value="colorectal">大腸癌</option>
+                <option value="stomach">胃癌</option>
+                <option value="hbp">肝胆膵癌</option>
+            </select>
+            <div class="badge-status" id="system-status-mobile">
+                <span class="pulse-dot"></span> AI分析連動中
             </div>
         </div>
     </header>

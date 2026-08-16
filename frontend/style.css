@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Breast Cancer Paper News & Journal Club Generator Stylesheet
+   Cancer Paper News & Journal Club Generator Stylesheet
    ========================================================================== */
 
 :root {
@@ -1262,7 +1262,112 @@ body {
 .skeleton-line.short {
     width: 70%;
 }
-.cancer-type-nav { display: flex; gap: 1rem; align-items: center; }
-.cancer-nav-link { color: var(--text-muted); text-decoration: none; font-weight: 500; font-size: 0.95rem; padding: 0.25rem 0.5rem; border-radius: var(--radius-sm); transition: all 0.2s; }
-.cancer-nav-link:hover, .cancer-nav-link.active { color: var(--primary-600); background-color: var(--primary-100); }
+.cancer-type-nav {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
 
+.cancer-nav-link {
+    color: rgba(255,255,255,0.75);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.cancer-nav-link:hover {
+    color: #ffffff;
+    background-color: rgba(255,255,255,0.12);
+}
+
+.cancer-nav-link.active {
+    color: #38bdf8;
+    background-color: rgba(56, 189, 248, 0.15);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+/* スマホ用: 癌腫ナビをセレクトボックスに切り替え */
+.cancer-type-select {
+    display: none;
+    background: rgba(255,255,255,0.12);
+    color: #ffffff;
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: var(--radius-sm);
+    padding: 0.4rem 2rem 0.4rem 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: var(--font-main);
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2338bdf8' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.65rem center;
+}
+
+.cancer-type-select option {
+    background: #1e293b;
+    color: #ffffff;
+}
+
+@media (max-width: 600px) {
+    .site-header {
+        padding: 0.75rem 1rem;
+    }
+
+    .header-container {
+        flex-wrap: wrap;
+        gap: 0.6rem;
+    }
+
+    .brand {
+        gap: 0.6rem;
+    }
+
+    .brand-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1.1rem;
+    }
+
+    .brand-text h1 {
+        font-size: 1.05rem;
+    }
+
+    /* PC用ナビを非表示 */
+    .cancer-type-nav {
+        display: none;
+    }
+
+    /* セレクトボックスを表示 */
+    .cancer-type-select {
+        display: block;
+    }
+
+    .badge-status {
+        font-size: 0.72rem;
+        padding: 0.3rem 0.6rem;
+    }
+
+    /* 2段目: セレクトボックスとステータスを横並び */
+    .header-second-row {
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .cancer-type-select {
+        flex: 1;
+    }
+
+    /* header-actionsをブランド行に組み込む */
+    .header-actions {
+        display: none;
+    }
+}
