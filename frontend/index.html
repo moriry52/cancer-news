@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Breast Cancer Paper News & Slide Generator | 乳癌論文デイリーニュース</title>
-    <meta name="description" content="乳腺外科医のための最新・高品質乳癌論文ニュースおよび簡易スライド自動生成ポータル">
+    <title>Cancer Paper News | 癌論文デイリーニュース</title>
+    <meta name="description" content="外科医・内科医のための最新・高品質癌論文ニュースおよび簡易スライド自動生成ポータル">
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96" />
@@ -63,7 +63,7 @@
     <section class="hero-section">
         <div class="hero-container">
             <div class="hero-content">
-                <h2>乳腺科医向け論文ニュース</h2>
+                <h2 id="hero-title">最新論文ニュース</h2>
                 <p>PubMed論文をAIが評価・要約・スライド生成。</p>
             </div>
             <div class="hero-stats">
@@ -119,7 +119,7 @@
             <!-- Dynamic Rendered Article Cards -->
             <div class="loading-spinner-wrapper" id="loading-state">
                 <div class="spinner"></div>
-                <p>Firestoreより最新の高評価論文を取得中...</p>
+                <p>Supabaseより最新の高評価論文を取得中...</p>
             </div>
         </div>
 
@@ -172,7 +172,7 @@
     <!-- Footer -->
     <footer class="site-footer">
         <div class="footer-container">
-            <p>&copy; 2026 Breast Cancer Paper News. Powered by Gemini API & PubMed Entrez.</p>
+            <p>&copy; 2026 Cancer Paper News. Powered by Gemini API & PubMed Entrez.</p>
         </div>
     </footer>
 

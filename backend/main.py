@@ -445,10 +445,11 @@ def save_to_supabase(supabase: Client, article: Dict[str, Any], eval_res: Evalua
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Breast Cancer News Batch Processor")
+    parser = argparse.ArgumentParser(description="Cancer News Batch Processor")
     parser.add_argument("--date", "--end-date", type=str, default=None, help="検索終了日 (YYYY-MM-DD形式。例: 2026-07-15。未指定時は今日)")
     parser.add_argument("--days", type=int, default=7, help="検索対象の遡り日数 (デフォルト: 7日間)")
     parser.add_argument("--limit", type=int, default=30, help="PubMedからの最大取得件数 (デフォルト: 30件)")
+    parser.add_argument("--cancer", type=str, default=None, help="対象とする癌種のID (未指定時は全て)")
     parser.add_argument("--dry-run", action="store_true", help="DBへの保存を行わずローカル出力のみテスト")
     args = parser.parse_args()
 
@@ -464,6 +465,12 @@ def main():
     cancers_file = os.path.join(os.path.dirname(__file__), "cancers.json")
     with open(cancers_file, "r", encoding="utf-8") as f:
         cancers = json.load(f)
+
+    if args.cancer:
+        cancers = [c for c in cancers if c["id"] == args.cancer]
+        if not cancers:
+            logger.error(f"指定された癌種 {args.cancer} が見つかりません.")
+            sys.exit(1)
 
     for cancer in cancers:
         logger.info(f"\n======================================================\n"

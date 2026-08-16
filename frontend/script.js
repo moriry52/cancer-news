@@ -1,5 +1,5 @@
 /**
- * Breast Cancer Paper News & Journal Club Generator
+ * Cancer Paper News & Journal Club Generator
  * Frontend Logic (Vanilla JS + Supabase)
  */
 
@@ -23,6 +23,20 @@ let totalCount = 0;
 let latestPublishedDate = "";
 let currentCancerType = 'breast';
 
+// Cancer type name mapping
+const CANCER_NAMES = {
+    'breast':      '乳癌',
+    'colorectal':  '大腸癌',
+    'stomach':     '胃癌',
+    'hbp':         '肝胆膵癌'
+};
+
+function updateHeroTitle() {
+    const heroTitle = document.getElementById('hero-title');
+    const name = CANCER_NAMES[currentCancerType] || '癌';
+    if (heroTitle) heroTitle.textContent = `${name} 最新論文ニュース`;
+}
+
 // Initialize Application
 document.addEventListener("DOMContentLoaded", async () => {
     // Client-side Routing logic
@@ -44,6 +58,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     showGridLoading();
     loadFavoritesFromStorage();
     fetchStats();
+    updateHeroTitle();
     setupEventListeners();
 
     // ディープリンクがある場合はそれを優先表示し、なければ通常の一覧を取得
@@ -141,9 +156,12 @@ async function fetchStats() {
 // Load / Save Favorites from LocalStorage
 function loadFavoritesFromStorage() {
     try {
-        const stored = localStorage.getItem("breast_cancer_news_favorites");
+        const key = `cancer_news_favorites_${currentCancerType}`;
+        const stored = localStorage.getItem(key);
         if (stored) {
             favoritePmids = new Set(JSON.parse(stored));
+        } else {
+            favoritePmids = new Set();
         }
     } catch (e) {
         console.error("LocalStorage読み込みエラー:", e);
@@ -153,7 +171,8 @@ function loadFavoritesFromStorage() {
 
 function saveFavoritesToStorage() {
     try {
-        localStorage.setItem("breast_cancer_news_favorites", JSON.stringify(Array.from(favoritePmids)));
+        const key = `cancer_news_favorites_${currentCancerType}`;
+        localStorage.setItem(key, JSON.stringify(Array.from(favoritePmids)));
     } catch (e) {
         console.error("LocalStorage保存エラー:", e);
     }
@@ -565,8 +584,9 @@ function closeSlideModal() {
 // 共有機能
 async function shareArticle(pmid, title) {
     const shareUrl = `${window.location.origin}/?pmid=${pmid}`;
+    const cancerName = CANCER_NAMES[currentCancerType] || '癌';
     const shareData = {
-        title: "乳癌論文ニュース",
+        title: `${cancerName}論文ニュース`,
         text: `【注目論文】${title}`,
         url: shareUrl,
     };
@@ -747,6 +767,12 @@ function setupEventListeners() {
             
             document.querySelectorAll('.cancer-nav-link').forEach(l => l.classList.remove('active'));
             link.classList.add('active');
+            
+            // Update hero title for new cancer type
+            updateHeroTitle();
+            
+            // Reset favorites for new cancer type
+            loadFavoritesFromStorage();
             
             // Reset to 'all' tab and fetch
             const allTab = document.querySelector('.category-tabs .tab-btn[data-category="all"]');
