@@ -62,7 +62,7 @@ body {
 
 .header-container {
     max-width: 1280px;
-    margin: 0 auto;
+    margin: 0 auto 0.5rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1262,6 +1262,7 @@ body {
 .skeleton-line.short {
     width: 70%;
 }
+
 .cancer-type-nav {
     display: flex;
     gap: 0.5rem;
@@ -1269,7 +1270,7 @@ body {
 }
 
 .cancer-nav-link {
-    color: rgba(255,255,255,0.75);
+    color: rgba(255, 255, 255, 0.75);
     text-decoration: none;
     font-weight: 600;
     font-size: 0.9rem;
@@ -1281,7 +1282,7 @@ body {
 
 .cancer-nav-link:hover {
     color: #ffffff;
-    background-color: rgba(255,255,255,0.12);
+    background-color: rgba(255, 255, 255, 0.12);
 }
 
 .cancer-nav-link.active {
@@ -1293,9 +1294,9 @@ body {
 /* スマホ用: 癌腫ナビをセレクトボックスに切り替え */
 .cancer-type-select {
     display: none;
-    background: rgba(255,255,255,0.12);
+    background: rgba(255, 255, 255, 0.12);
     color: #ffffff;
-    border: 1px solid rgba(255,255,255,0.25);
+    border: 1px solid rgba(255, 255, 255, 0.25);
     border-radius: var(--radius-sm);
     padding: 0.4rem 2rem 0.4rem 0.75rem;
     font-size: 0.9rem;
@@ -1327,6 +1328,7 @@ body {
     .header-container {
         flex-wrap: wrap;
         gap: 0.6rem;
+        margin: 0 auto 0.5rem;
     }
 
     .brand {
