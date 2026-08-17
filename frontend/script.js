@@ -78,7 +78,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         currentCancerType = pathPart;
     } else {
         currentCancerType = 'breast';
-        window.history.replaceState(null, '', '/breast');
+        // クエリストリング(?pmid=...など)を保持したままパスを正規化
+        window.history.replaceState(null, '', '/breast' + window.location.search);
     }
     
     document.querySelectorAll('.cancer-nav-link').forEach(link => {
@@ -621,7 +622,8 @@ function closeSlideModal() {
 
 // 共有機能
 async function shareArticle(pmid, title) {
-    const shareUrl = `${window.location.origin}/?pmid=${pmid}`;
+    // 癌種パスを含めることでディープリンク受信時に正しい癌種で開く
+    const shareUrl = `${window.location.origin}/${currentCancerType}?pmid=${pmid}`;
     const cancerName = CANCER_NAMES[currentCancerType] || '癌';
     const shareData = {
         title: `${cancerName}論文ニュース`,
