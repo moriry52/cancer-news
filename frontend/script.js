@@ -64,6 +64,7 @@ function switchCancerType(targetType) {
 
     fetchStats();
     applyFiltersAndRender();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // Initialize Application
