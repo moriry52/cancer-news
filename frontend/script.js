@@ -782,6 +782,29 @@ function setupEventListeners() {
         });
     }*/
 
+    // Home button (brand logo click) - reset to top
+    const btnHome = document.getElementById('btn-home');
+    if (btnHome) {
+        btnHome.addEventListener('click', () => {
+            // カテゴリタブを「すべて」にリセット
+            const allTab = document.querySelector('.category-tabs .tab-btn[data-category="all"]');
+            if (allTab) {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                allTab.classList.add('active');
+            }
+            // 検索ワードをクリア
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) searchInput.value = '';
+            // ソートをデフォルトに
+            const sortSelect = document.getElementById('sort-select');
+            if (sortSelect) sortSelect.value = 'published_desc';
+            // 1ページ目から再取得
+            fetchArticles(1);
+            // スムーズにトップへ
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+
     // Category Tabs
     const categoryTabs = document.getElementById("category-tabs");
     if (categoryTabs) {
