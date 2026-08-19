@@ -444,6 +444,25 @@ def save_to_supabase(supabase: Client, article: Dict[str, Any], eval_res: Evalua
         logger.error(f"Supabaseへの保存中にエラーが発生しました [PMID {article['pmid']}]: {e}")
 
 
+def cleanup_old_articles(supabase: Client, retention_years: int = 5):
+    """保存期間（デフォルト5年）を過ぎた古い論文データを削除する"""
+    if not supabase:
+        return
+    
+    try:
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=365 * retention_years)
+        cutoff_iso = cutoff_date.isoformat()
+        
+        # published_at が cutoff_date より古いレコードを削除
+        response = supabase.table('articles').delete().lt('published_at', cutoff_iso).execute()
+        deleted_count = len(response.data) if hasattr(response, 'data') and response.data else 0
+        
+        if deleted_count > 0:
+            logger.info(f"【データ整理】{retention_years}年以上経過した古い論文データを {deleted_count} 件削除しました。")
+    except Exception as e:
+        logger.error(f"古い論文データのクリーンアップ中にエラーが発生しました: {e}")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Cancer News Batch Processor")
     parser.add_argument("--date", "--end-date", type=str, default=None, help="検索終了日 (YYYY-MM-DD形式。例: 2026-07-15。未指定時は今日)")
@@ -456,6 +475,9 @@ def main():
     supabase_client = None if args.dry_run else init_supabase()
     if not args.dry_run and not supabase_client:
         sys.exit(1)
+        
+    if supabase_client:
+        cleanup_old_articles(supabase_client, retention_years=5)
 
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key and not args.dry_run:

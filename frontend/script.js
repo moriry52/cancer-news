@@ -299,7 +299,7 @@ async function fetchArticles(page = 1) {
 
         // Search filter
         if (search) {
-            const keywords = search.split(/\\s+/).filter(k => k);
+            const keywords = search.split(/\s+/).filter(k => k);
             if (keywords.length > 0) {
                 for (let i = 0; i < keywords.length; i++) {
                     query = query.or(`title.ilike.%${keywords[i]}%,title_ja.ilike.%${keywords[i]}%,journal.ilike.%${keywords[i]}%,score_reason.ilike.%${keywords[i]}%`);
@@ -748,26 +748,6 @@ function renderSlideView() {
     }
 }
 
-
-// Copy Slide Content to Clipboard
-function copyCurrentSlideToClipboard() {
-    if (!currentArticleForModal || !currentArticleForModal.slides) return;
-    const slide = currentArticleForModal.slides[currentSlideIndex];
-
-    const textToCopy = `【${slide.title}】\n` + (slide.bullets || []).map(b => `・${b}`).join("\n");
-
-    navigator.clipboard.writeText(textToCopy).then(() => {
-        //const copyBtn = document.getElementById("btn-copy-slide");
-        const originalHtml = copyBtn.innerHTML;
-        copyBtn.innerHTML = `<i class="fa-solid fa-check" style="color:#059669;"></i> コピー完了!`;
-        setTimeout(() => {
-            copyBtn.innerHTML = originalHtml;
-        }, 1800);
-    }).catch(err => {
-        console.error("クリップボードコピー失敗:", err);
-    });
-}
-
 // Setup DOM Event Listeners
 function setupEventListeners() {
     // Refresh Button
@@ -852,8 +832,6 @@ function setupEventListeners() {
             renderSlideView();
         }
     });
-
-    //document.getElementById("btn-copy-slide").addEventListener("click", copyCurrentSlideToClipboard);
 
     // Keyboard Arrow Keys for Slide Navigation
     document.addEventListener("keydown", (e) => {
