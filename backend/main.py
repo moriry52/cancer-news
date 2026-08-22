@@ -311,8 +311,8 @@ Abstract: {art['abstract']}
 
     logger.info(f"Gemini APIへ全 {len(articles)} 件の論文を一括送信中 (1 API Call Batch Processing)...")
 
-    max_retries = 3
-    base_delay = 10
+    max_retries = 5
+    base_delay = 20
 
     for attempt in range(max_retries):
         try:
