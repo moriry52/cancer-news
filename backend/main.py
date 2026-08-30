@@ -137,7 +137,7 @@ def fetch_recent_pubmed_articles(mesh_term: str, end_date_str: Optional[str] = N
 
     start_date = end_date - timedelta(days=days)
     
-    date_str = f"{start_date.strftime('%Y/%m/%d')}:{end_date.strftime('%Y/%m/%d')}[PDAT]"
+    date_str = f"{start_date.strftime('%Y/%m/%d')}:{end_date.strftime('%Y/%m/%d')}[EDAT]"
     term = f'{mesh_term} AND {date_str}'
     
     logger.info(f"PubMed検索開始: 期間 {start_date.strftime('%Y/%m/%d')} 〜 {end_date.strftime('%Y/%m/%d')} (過去{days}日間)")
