@@ -258,16 +258,22 @@ def primary_filter(article: Dict[str, Any], existing_pmids: set) -> bool:
 
 
 def evaluate_all_articles_in_batch(articles: List[Dict[str, Any]], api_key: str, cancer: Dict[str, Any]) -> List[EvaluatedArticle]:
-    """Gemini APIの超長コンテキストを活用し、全論文を一括で1回のリクエストで評価・スライド生成する"""
+    """Gemini APIの超長コンテキストを活用し、論文を分割バッチ処理して評価・スライド生成する"""
     from google import genai
     from google.genai import types
 
     client = genai.Client(api_key=api_key)
+    all_evaluations = []
+    
+    # 出力トークン上限(8192)によるJSON切れを防ぐため、50件ずつに分割
+    batch_size = 50
+    for i in range(0, len(articles), batch_size):
+        chunk = articles[i:i + batch_size]
+        logger.info(f"Gemini APIへバッチ送信中... ({i+1}〜{min(i+batch_size, len(articles))} / {len(articles)} 件)")
 
-    # 全論文のテキストを1つの巨大プロンプトへ結合
-    articles_formatted_text = ""
-    for idx, art in enumerate(articles, start=1):
-        articles_formatted_text += f"""
+        articles_formatted_text = ""
+        for idx, art in enumerate(chunk, start=1):
+            articles_formatted_text += f"""
 ---
 [論文 #{idx}]
 PMID: {art['pmid']}
@@ -276,9 +282,9 @@ Journal: {art['journal']}
 Abstract: {art['abstract']}
 """
 
-    prompt = f"""
+        prompt = f"""
 あなたは日本の{cancer['specialty_name']}トップ専門医であり、医局の抄読会幹事です。
-以下に提示する全 {len(articles)} 件の{cancer['cancer_name']}関連論文を一括で精読・比較評価し、各論文について日本の{cancer['doctor_type']}にとっての「読む価値・面白さ」を厳密にスコアリング（100点満点）してください。
+以下に提示する全 {len(chunk)} 件の{cancer['cancer_name']}関連論文を一括で精読・比較評価し、各論文について日本の{cancer['doctor_type']}にとっての「読む価値・面白さ」を厳密にスコアリング（100点満点）してください。
 
 【選別における最重要方針】
 本システムは「臨床医（{cancer['doctor_type']}）向け」のニュース配信です。
@@ -300,7 +306,7 @@ Abstract: {art['abstract']}
 - サンプルサイズが極めて小さく、エビデンスレベルが低い後ろ向き観察研究
 - 70点未満の論文については、日本語3行要約(summary_3lines)およびスライド(slides)を生成せず空配列（[]）としてください。
 
-【全 {len(articles)} 件の論文リスト】
+【全 {len(chunk)} 件の論文リスト】
 {articles_formatted_text}
 
 【出力要件】
@@ -309,38 +315,43 @@ Abstract: {art['abstract']}
 - 70点以上の高評価論文についてのみ、必ず日本語3行要約(summary_3lines)と抄読会用5枚スライド(slides: Background, Methods, Results, Conclusion, Clinical Takeaway)を作成してください。
 """
 
-    logger.info(f"Gemini APIへ全 {len(articles)} 件の論文を一括送信中 (1 API Call Batch Processing)...")
+        max_retries = 5
+        base_delay = 20
+        chunk_success = False
 
-    max_retries = 5
-    base_delay = 20
+        for attempt in range(max_retries):
+            try:
+                response = client.models.generate_content(
+                    model='gemini-3.1-flash-lite',
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        response_schema=BatchEvaluationResponse,
+                        temperature=0.2
+                    ),
+                )
 
-    for attempt in range(max_retries):
-        try:
-            response = client.models.generate_content(
-                model='gemini-3.1-flash-lite',
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    response_schema=BatchEvaluationResponse,
-                    temperature=0.2
-                ),
-            )
+                if response.text:
+                    result_dict = json.loads(response.text)
+                    batch_res = BatchEvaluationResponse(**result_dict)
+                    all_evaluations.extend(batch_res.evaluations)
+                    chunk_success = True
+                    break
 
-            if response.text:
-                result_dict = json.loads(response.text)
-                batch_res = BatchEvaluationResponse(**result_dict)
-                return batch_res.evaluations
-            return []
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    delay = base_delay * (2 ** attempt)
+                    logger.warning(f"Gemini API エラー (試行 {attempt + 1}/{max_retries}): {e}")
+                    logger.info(f"{delay}秒後にリトライします...")
+                    time.sleep(delay)
+                else:
+                    logger.error(f"Gemini API 一括評価中にエラーが発生し、{max_retries}回のリトライに失敗しました。このバッチはスキップされます: {e}")
+                    
+        # バッチ間で少し待機してレートリミットを回避
+        if chunk_success and i + batch_size < len(articles):
+            time.sleep(3)
 
-        except Exception as e:
-            if attempt < max_retries - 1:
-                delay = base_delay * (2 ** attempt)
-                logger.warning(f"Gemini API エラー (試行 {attempt + 1}/{max_retries}): {e}")
-                logger.info(f"{delay}秒後にリトライします...")
-                time.sleep(delay)
-            else:
-                logger.error(f"Gemini API 一括評価中にエラーが発生し、{max_retries}回のリトライに失敗しました: {e}")
-                return []
+    return all_evaluations
 
 
 def init_supabase() -> Optional[Client]:
