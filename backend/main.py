@@ -254,7 +254,7 @@ def primary_filter(article: Dict[str, Any], existing_pmids: set) -> bool:
     if is_major_journal or is_priority_design or len(article["abstract"]) > 300:
         return True
 
-    return True
+    return False
 
 
 def evaluate_all_articles_in_batch(articles: List[Dict[str, Any]], api_key: str, cancer: Dict[str, Any]) -> List[EvaluatedArticle]:
@@ -467,7 +467,7 @@ def main():
     parser = argparse.ArgumentParser(description="Cancer News Batch Processor")
     parser.add_argument("--date", "--end-date", type=str, default=None, help="検索終了日 (YYYY-MM-DD形式。例: 2026-07-15。未指定時は今日)")
     parser.add_argument("--days", type=int, default=7, help="検索対象の遡り日数 (デフォルト: 7日間)")
-    parser.add_argument("--limit", type=int, default=30, help="PubMedからの最大取得件数 (デフォルト: 30件)")
+    parser.add_argument("--limit", type=int, default=500, help="PubMedからの最大取得件数 (デフォルト: 500件)")
     parser.add_argument("--cancer", type=str, default=None, help="対象とする癌種のID (未指定時は全て)")
     parser.add_argument("--dry-run", action="store_true", help="DBへの保存を行わずローカル出力のみテスト")
     args = parser.parse_args()
