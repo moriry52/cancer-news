@@ -333,6 +333,7 @@ Abstract: {art['abstract']}
                 )
 
                 if response.text:
+                    logger.info(f"Gemini API Response:\n{response.text}")
                     result_dict = json.loads(response.text)
                     batch_res = BatchEvaluationResponse(**result_dict)
                     all_evaluations.extend(batch_res.evaluations)
