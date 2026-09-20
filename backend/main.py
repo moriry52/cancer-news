@@ -74,7 +74,7 @@ EXCLUDED_PUB_TYPES = [
 
 PRIORITY_PUB_TYPES = [
     "randomized controlled trial", "clinical trial, phase iii",
-    "meta-analysis", "systematic review", "clinical trial, phase ii"
+    "meta-analysis", "systematic review", "clinical trial, phase ii", "clinical trial, phase i"
 ]
 
 
@@ -138,7 +138,7 @@ def fetch_recent_pubmed_articles(mesh_term: str, end_date_str: Optional[str] = N
     start_date = end_date - timedelta(days=days)
     
     date_str = f"{start_date.strftime('%Y/%m/%d')}:{end_date.strftime('%Y/%m/%d')}[EDAT]"
-    term = f'{mesh_term} AND {date_str}'
+    term = f'{mesh_term} AND "humans"[MeSH Terms] NOT "Case Reports"[Publication Type] NOT "Editorial"[Publication Type] AND {date_str}'
     
     logger.info(f"PubMed検索開始: 期間 {start_date.strftime('%Y/%m/%d')} 〜 {end_date.strftime('%Y/%m/%d')} (過去{days}日間)")
     
@@ -251,7 +251,7 @@ def primary_filter(article: Dict[str, Any], existing_pmids: set) -> bool:
     is_major_journal = any(mj in journal_lower for mj in MAJOR_JOURNALS)
     is_priority_design = any(any(p_type in pt for pt in pub_types_lower) for p_type in PRIORITY_PUB_TYPES)
 
-    if is_major_journal or is_priority_design or len(article["abstract"]) > 300:
+    if is_major_journal or is_priority_design:
         return True
 
     return False
@@ -288,22 +288,23 @@ Abstract: {art['abstract']}
 
 【選別における最重要方針】
 本システムは「臨床医（{cancer['doctor_type']}）向け」のニュース配信です。
-ヒトを対象とした臨床研究（Clinical Study / Trial / Real-world data）を最も高く評価してください。
-マウスや細胞等を用いた基礎研究（Basic / Preclinical Research）は、既存の臨床課題（耐性克服や新薬等）を直接解決する極めてインパクトの強いもの以外は厳しく低評価（70点未満）としてください。
+ヒトを対象とした臨床研究（Clinical Study / Trial / Real-world data）のみを高く評価してください。
+基礎研究（in vitro, in vivo、動物モデル等）や症例報告は【0点】としてください。
+臨床試験（Phase IIIなど）を最も高く評価します。Phase I/II や観察研究についても、新規性やインパクトが高ければ評価対象とします。
 
 【評価基準 (合計100点満点)】
 1. 臨床影響度・対象（0-40点）:
-   - 【加点】ヒト対象の臨床研究（Phase I-III, RCT, コホート研究, RWD）であり、明日からの{cancer['cancer_name']}診療・処方・外科手術に直結するインパクトがあるか。
-   - 【厳重審査】基礎研究（in vitro, in vivo）の場合、単なるメカニズム解析ではなく、即座に臨床第I相試験や新しい標的治療に繋がるレベルの非臨床データがあるか。
+   - 【加点】Phase III試験など、エビデンスレベルが高く、明日からの{cancer['cancer_name']}診療・処方・外科手術に直結するインパクトがあるか。
+   - 【減点】観察研究でサンプルサイズが極めて小さいものや、臨床的意義が薄いものは大幅に減点してください。
 2. 新規性・話題性（0-30点）:
    - {cancer.get('trend_keywords', '')} など、臨床医の関心が高いトレンドテーマか。
 3. 抄読会適合度（0-30点）:
    - 医局のカンファレンスや抄読会で「明日の診療や今後の治験にどう活かすか」をディスカッションできる内容か。
 
-【AI評価で明確に70点未満（除外）とする論文】
+【AI評価で明確に70点未満（不合格）とする論文】
+- 基礎研究、動物実験、細胞実験
 - 症例報告 (case report)
-- 臨床への還元性が不透明な一般的・予備的な基礎研究（例: 単一の細胞株での遺伝子ノックダウン、臨床検体・データを含まない単なる動物実験モデル等）
-- サンプルサイズが極めて小さく、エビデンスレベルが低い後ろ向き観察研究
+- サンプルサイズが極めて小さく、エビデンスレベルが低い観察研究
 - 70点未満の論文については、日本語3行要約(summary_3lines)およびスライド(slides)を生成せず空配列（[]）としてください。
 
 【全 {len(chunk)} 件の論文リスト】
@@ -477,7 +478,7 @@ def cleanup_old_articles(supabase: Client, retention_years: int = 5):
 def main():
     parser = argparse.ArgumentParser(description="Cancer News Batch Processor")
     parser.add_argument("--date", "--end-date", type=str, default=None, help="検索終了日 (YYYY-MM-DD形式。例: 2026-07-15。未指定時は今日)")
-    parser.add_argument("--days", type=int, default=7, help="検索対象の遡り日数 (デフォルト: 7日間)")
+    parser.add_argument("--days", type=int, default=7, help="検索対象の遡り日数 (デフォルト: 3日間)")
     parser.add_argument("--limit", type=int, default=500, help="PubMedからの最大取得件数 (デフォルト: 500件)")
     parser.add_argument("--cancer", type=str, default=None, help="対象とする癌種のID (未指定時は全て)")
     parser.add_argument("--dry-run", action="store_true", help="DBへの保存を行わずローカル出力のみテスト")
@@ -572,6 +573,7 @@ def main():
             except ValueError:
                 target_date_obj = None
 
+        passing_articles = []
         for art in filtered_articles:
             pmid = art["pmid"]
             eval_res = eval_map.get(pmid)
@@ -584,14 +586,20 @@ def main():
             logger.info(f"[OK] 判定完了 PMID {pmid}: スコア={eval_res.score}点 ({status_str}) - {eval_res.score_reason}")
 
             if eval_res.score >= 70:
-                passed_count += 1
-                save_to_supabase(supabase_client, art, eval_res, cancer_id=cancer['id'], target_date=target_date_obj)
-                saved_articles.append({
-                    "article": art,
-                    "evaluation": eval_res.model_dump()
-                })
+                passing_articles.append((art, eval_res))
 
-        logger.info(f"=== {cancer['name']} の一括処理完了: 70点以上の高評価合格論文: {passed_count} 件 / 全 {len(filtered_articles)} 件 ===")
+        passing_articles.sort(key=lambda x: x[1].score, reverse=True)
+        top_articles = passing_articles[:2]
+
+        for art, eval_res in top_articles:
+            passed_count += 1
+            save_to_supabase(supabase_client, art, eval_res, cancer_id=cancer['id'], target_date=target_date_obj)
+            saved_articles.append({
+                "article": art,
+                "evaluation": eval_res.model_dump()
+            })
+
+        logger.info(f"=== {cancer['name']} の一括処理完了: Top {len(top_articles)} 高評価合格論文: {passed_count} 件 / 全 {len(filtered_articles)} 件 ===")
 
     if args.dry_run and saved_articles:
         print("\n--- [DRY-RUN OUTPUT SAMPLING] ---")
